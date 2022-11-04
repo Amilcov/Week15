@@ -26,9 +26,7 @@ const EditItemForm = ({ itemId, hideForm }) => {
       price,
     };
 
-    let updatedItem;
-    console.log('ItemUpdate:', payload);
-    updatedItem = await dispatch(updateItem(payload));
+    let updatedItem = await dispatch(updateItem(payload));
     if (updatedItem) {
       hideForm();
     }
