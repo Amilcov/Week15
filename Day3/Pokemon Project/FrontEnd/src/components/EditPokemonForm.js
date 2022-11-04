@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getPokemonTypes } from '../store/pokemon';
+import { getPokemonTypes, updatePokemon } from '../store/pokemon';
 
 const EditPokemonForm = ({ pokemon, hideForm }) => {
+  console.log('EPF');
   const pokeTypes = useSelector(state => state.pokemon.types);
   const dispatch = useDispatch();
 
@@ -31,20 +32,20 @@ const EditPokemonForm = ({ pokemon, hideForm }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // const payload = {
-    //   ...pokemon,
-    //   no,
-    //   attack,
-    //   defense,
-    //   imageUrl,
-    //   name,
-    //   type,
-    //   move1,
-    //   move2,
-    //   moves: [move1, move2],
-    // };
+    const payload = {
+      ...pokemon,
+      no,
+      attack,
+      defense,
+      imageUrl,
+      name,
+      type,
+      move1,
+      move2,
+      moves: [move1, move2],
+    };
 
-    let updatedPokemon;
+    let updatedPokemon = await dispatch(updatePokemon(payload));
     if (updatedPokemon) {
       hideForm();
     }
