@@ -12,14 +12,12 @@ router.put(
   "/:id",
   itemValidations.validateUpdate,
   asyncHandler(async function (req, res) {
-        console.log('_______100 Pokemon URL');
     const item = await ItemsRepository.updateItem(req.body);
     return res.json(item);
   })
 );
 
 router.delete("/:id", asyncHandler(async function (req, res) {
-      console.log('_______101 Pokemon URL');
   const itemId = await ItemsRepository.deleteItem(req.params.id);
   return res.json({ itemId });
 }));
