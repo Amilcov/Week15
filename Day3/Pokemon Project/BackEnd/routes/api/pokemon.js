@@ -12,7 +12,6 @@ const itemValidations = require('../../validations/items');
 const router = express.Router();
 
 router.get('/', asyncHandler(async function(_req, res) {
-    console.log('_______1 Pokemon URL');
   const pokemon = await PokemonRepository.list();
   return res.json(pokemon);
 }));
@@ -24,8 +23,16 @@ router.post(
     //const id = await PokemonRepository.create(req.body);
     //return res.redirect(`${req.baseUrl}/${id}`);
     const pokemon = await PokemonRepository.create(req.body);
-    console.log(' DB pokemon', pokemon);
-    return res.json(pokemon);
+  
+    //return res.json(pokemon);
+    return res.json({
+      imageUrl: pokemon.imageUrl,
+      id: pokemon.id,
+      no: pokemon.no,
+      name: pokemon.name, 
+      captured: false
+    });
+
   })
 );
 
