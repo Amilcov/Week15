@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { addPokemon } from '../store/pokemon';
+import { updateItem } from '../store/items';
  
 
 const EditItemForm = ({ itemId, hideForm }) => {
@@ -27,7 +27,8 @@ const EditItemForm = ({ itemId, hideForm }) => {
     };
 
     let updatedItem;
-    updatedItem = await dispatch(addPokemon);
+    console.log('ItemUpdate:', payload);
+    updatedItem = await dispatch(updateItem(payload));
     if (updatedItem) {
       hideForm();
     }

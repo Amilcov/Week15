@@ -29,7 +29,6 @@ const initialState = {};
 
 
 export const getItems = (pokemonId) => async dispatch  => {
-  console.log('getItems poke id:', pokemonId);
    const response = await fetch(`/api/pokemon/${pokemonId}/items`);
 
    if (response.ok) {
@@ -37,6 +36,26 @@ export const getItems = (pokemonId) => async dispatch  => {
       dispatch(load(items, pokemonId));
    }
 
+}
+
+export const updateItem = (item) => async dispatch => {
+  console.log('store- item -updateItem function', item);
+   const response = await fetch(`/api/items/${item.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+
+    },
+    body: JSON.stringify(item)
+   });
+
+   if (response.ok) {
+    const item = await response.json();
+    dispatch(update(item));
+    return item;
+   } else {
+    alert('Error on update item', response);
+  }
 }
 
 const itemsReducer = (state = initialState, action) => {
@@ -58,6 +77,7 @@ const itemsReducer = (state = initialState, action) => {
     }
     case ADD_ITEM:
     case UPDATE_ITEM: {
+      console.log('Store -> Reducer -> UPDATE_ITEM action', { ...state, [action.item.id]: action.item});
       return {
         ...state,
         [action.item.id]: action.item,
