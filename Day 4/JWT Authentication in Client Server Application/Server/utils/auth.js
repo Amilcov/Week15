@@ -5,7 +5,6 @@ const { secret, expiresIn } = jwtConfig;
 
 
 const setTokenCookie = (res, user) => {
-  
     const token = jwt.sign(
           { data: user.toSafeObject() },
           secret,
@@ -23,7 +22,6 @@ const setTokenCookie = (res, user) => {
 
     return token;
 };
-
 
 const restoreUser = (req, res, next) => {
     const { token } = req.cookies;
