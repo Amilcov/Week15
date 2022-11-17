@@ -1,0 +1,79 @@
+STEPS BackEnd:
+
+
+
+***********************************************STEP 1: Init and Setup Project***********************************************
+
+
+1.1 Package.json init and install Packages
+
+    1.1.1 Package.json init
+        ________SCOP:      Initializam package.json 
+        ________CMD:       npm init -y      
+        ________REZULTAT:  package.json
+
+
+    1.1.2 
+        ________SCOP:    Instalam pachetele necesare ca dependencies:
+
+        ________CMD:     npm inistall x, unde x este:
+        bcryptjs        // password hashing
+        cookie-parser   //parsing cookies din requests
+        cors            //CORS
+        csurf           //CSRF Protection
+
+        dotenv         //incarcam variabilele environment din .env file in Node.js
+        express        //Express
+        express-async-handler // pt async routes handlers
+        express-validator // pt validari body req sa indeplinesca conditiile necesare
+
+        helmet         // security middleware
+        jsonwebtoken   // JWT
+        morgan         // log in teminal request & response
+        per-env       // sa porneasca app in fc de variabilele environment
+
+        pg             //PostgreSQL
+        sequelize      //Sequelize
+        sequelize-cli  //pt a putea folosi Sequelize in linia de comanda
+
+        ________REZULTAT: add in package.json in sectiunea dependencies cele x packages
+
+
+
+    1.1.3
+        ________SCOP:    Instalam pachetele necesare ca devDependencies:
+
+        ________CMD:     npm inistall -D x, unde x este:
+        dotenv-cli     //pentru a putea folosi dotenv in linia de comanda
+        nodemon        // hot reload pt backend files de 
+
+        ________REZULTAT: add in package.json in sectiunea devDependencies cele x packages
+
+
+
+
+
+1.2 Configuration environment variables
+
+   1.2.1 Creem fisierul pt variabilele de enironment .env si il configuram
+        ________SCOP:      Creeam fisierul .env (in care declaram variabilele de environment)
+        ________CMD:          
+            in .env: 
+            PORT=5000
+            DB_DATABASE=books_library
+            DB_USERNAME=books_library_app
+            DB_PASSWORD=books_library_app
+            DB_HOST=localhost
+            JWT_SECRET=DOvmZWzikuXh2A==
+            JWT_EXPIRES_IN=604800
+
+        ________REZULTAT: un  .env configurat
+
+        Nota: Pt generarea Secret Toke folosim libraria openssl (care e deja instalata pe MacOS si Ubuntu)
+
+
+    1.2.2 creem fisierul de config/index.js care citeste variabilele din .env si le pune la dispozitia app intr-o forma organizata
+    
+       
+
+
