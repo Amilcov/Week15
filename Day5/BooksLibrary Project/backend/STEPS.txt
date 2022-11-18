@@ -586,7 +586,7 @@ STEPS BackEnd:
                     ________REZULTAT: in modelul users avem constraints
 
 
-              Nota: unde avem o comanda 'sequelize db: ' bagam si dotenv 
+  
 
 
 
@@ -610,17 +610,162 @@ STEPS BackEnd:
                     ________REZULTAT: db/seeders/TS-demo-user.js
 
 
-              Nota: unde avem o comanda 'sequelize db: ' bagam si dotenv 
+         
 
             
 
 
-        
+
+***********************************************STEP 5: fc declarate pe models/TS-user.js ***********************************************
+
+5.1 Add an instance method care va compara parola primita cu care care e in baza sa vada daca sunt identice
+
+            ________SCOP:  add validatePassword method In Users model
+            ________CMD: 
+                        User.prototype.validatePassword = function (password) {
+                             return bcrypt.compareSync(password, this.hashedPassword.toString());
+                        };
+                     
+            ________REZULTAT: e creata functia de validatePassword (vs DBpasword hashuita)
+
+5.2 Add an instance method care return an object doar cu info care sunt safe sa fie in JWT TOKEN
+
+            ________SCOP:  creem fc .toSafeObject  care selectAZA info pe care le returneaza in OBj care va fi trimis la playload in TOKEN
+            ________CMD: 
+                        User.prototype.toSafeObject = function() { // remember, this cannot be an arrow function
+                            const { id, username, email } = this; // context will be the User instance
+                            return { id, username, email };
+                        };
+                     
+            ________REZULTAT: e creata functia toSafeObject care va selecta ce info se duc in JWT TOKEN
 
 
-                
+5.3 Add a static method getUserById care retureza userul cu resp Id
+
+            ________SCOP:  creem fc .toSafeObject  care selectAZA info pe care le returneaza in OBj care va fi trimis la playload in TOKEN
+            ________CMD: User.getCurrentUserById = async function (id) {
+                             return await User.scope('currentUser').findByPk(id);
+                         };
+            ________REZULTAT: e creata functia getUserById 
+
+5.4 Add a static method login care va loga userul daca pwd e 'al din DB
+
+            ________SCOP:  creem fc .login ai parola intri/ nu ai nu intri in app
+            ________CMD: User.login = async function ({ credential, password }) {
+                            const { Op } = require('sequelize');
+                            const user = await User.findOne({
+                                where: {
+                                [Op.or]: {
+                                    username: credential,
+                                    email: credential,
+                                },
+                                },
+                            });
+                            if (user && user.validatePassword(password)) {
+                                return await User.findByPk(user.id);
+                            }
+                            };
+
+            ________REZULTAT: e creata functia: login 
 
 
+5.5 Add a static method signup care va inregistra un user - toti userii inregistrati online/ din afara aplicatiei vor fi de tip reader
+
+            ________SCOP:  creem fc .signup ai parola intri/ nu ai nu intri in app
+            ________CMD: 
+                        User.signup = async function ({ username, email, password }) {
+                            const hashedPassword = bcrypt.hashSync(password);
+                            const user = await User.create({
+                            username,
+                            email,
+                            hashedPassword,
+                            });
+                            return await User.findByPk(user.id);
+                        };  
+
+            ________REZULTAT: e creeata fc sign:up
 
 
-***********************************************STEP 5: TABLE Users***********************************************
+***********************************************STEP 6: User Auth middlewares ***********************************************
+
+6.0 creeam folderul utils 
+            -> creem auth.js in interiorul utils/
+
+       Nota: /utils/auth.js - will be the playground for auth Symphony
+
+6.1 
+        ________SCOP:  creem fc SetTokenCookie.  Generam un token  pe baza secret key (JWT secret) pe care il salvam intr-un cookie numit token. 
+        ________CMD: 
+                      
+                // Sends a JWT Cookie
+                const setTokenCookie = (res, user) => {
+
+                // Create the token.
+                const token = jwt.sign(
+                    { data: user.toSafeObject() },
+                    secret,
+                    { expiresIn: parseInt(expiresIn) }, // 604,800 seconds = 1 week
+                );
+
+                const isProduction = process.env.NODE_ENV === "production";
+
+                // Set the token cookie
+                res.cookie('token', token, {
+                    maxAge: expiresIn * 1000, // maxAge in milliseconds
+                    httpOnly: true,
+                    secure: isProduction,
+                    sameSite: isProduction && "Lax",
+                });
+
+                return token;
+                };
+
+            ________REZULTAT: e creeata fc SetTokenCookie
+
+
+6.2
+             ________SCOP:  creem fc restoreUser.  
+             ________CMD: 
+
+                        const restoreUser = (req, res, next) => {
+                        // token parsed from cookies
+                        const { token } = req.cookies;
+
+                        return jwt.verify(token, secret, null, async (err, jwtPayload) => {
+                            if (err) {
+                            return next();
+                            }
+
+                            try {
+                            const { id } = jwtPayload.data;
+                            req.user = await User.scope('currentUser').findByPk(id);
+                            } catch (e) {
+                            res.clearCookie('token');
+                            return next();
+                            }
+
+                            if (!req.user) res.clearCookie('token');
+
+                            return next();
+                        });
+                        };
+             ________REZULTAT: e creeata fc restoreUser
+
+6.3
+             ________SCOP: creeam fc requireAuth
+             ________CMD: 
+              const requireAuth = [
+                    restoreUser,
+                    function (req, res, next) {
+                        if (req.user) return next();
+
+                        const err = new Error('Unauthorized');
+                        err.title = 'Unauthorized';
+                        err.errors = ['Unauthorized'];
+                        err.status = 401;
+                        return next(err);
+                    },
+                    ];
+             ________REZULTAT: e creeata fc requireAuth
+
+
