@@ -1,0 +1,1045 @@
+STEPS BackEnd:
+
+
+
+***********************************************STEP 1: Init and Setup Project***********************************************
+
+
+1.1 ////////////////////////// Package.json init and install Packages //////////////////////////
+
+    1.1.1 Package.json init
+        ________SCOP:      Initializam package.json 
+        ________CMD:       npm init -y      
+        ________REZULTAT:  package.json
+
+
+    1.1.2 
+        ________SCOP:    Instalam pachetele necesare ca dependencies:
+
+        ________CMD:     npm inistall x, unde x este:
+        bcryptjs        // password hashing
+        cookie-parser   //parsing cookies din requests
+        cors            //CORS
+        csurf           //CSRF Protection
+
+        dotenv         //incarcam variabilele environment din .env file in Node.js
+        express        //Express
+        express-async-handler // pt async routes handlers
+        express-validator // pt validari body req sa indeplinesca conditiile necesare
+
+        helmet         // security middleware
+        jsonwebtoken   // JWT
+        morgan         // log in teminal request & response
+        per-env       // sa porneasca app in fc de variabilele environment
+
+        pg             //PostgreSQL
+        sequelize      //Sequelize
+        sequelize-cli  //pt a putea folosi Sequelize in linia de comanda
+
+        ________REZULTAT: add in package.json in sectiunea dependencies cele x packages
+
+
+
+    1.1.3
+        ________SCOP:    Instalam pachetele necesare ca devDependencies:
+
+        ________CMD:     npm inistall -D x, unde x este:
+                dotenv-cli     //pentru a putea folosi dotenv in linia de comanda
+                nodemon        // hot reload pt backend files de 
+
+        ________REZULTAT: add in package.json in sectiunea devDependencies cele x packages
+
+
+
+
+
+1.2 ////////////////////////// Configuration environment variables //////////////////////////
+
+   1.2.1 Creem fisierul pt variabilele de enironment .env si il configuram
+        ________SCOP:      Creeam fisierul .env (in care declaram variabilele de environment)
+        ________CMD:          
+            in .env: 
+            PORT=5000
+            DB_DATABASE=books_library
+            DB_USERNAME=books_library_app
+            DB_PASSWORD=books_library_app
+            DB_HOST=localhost
+            JWT_SECRET=DOvmZWzikuXh2A==
+            JWT_EXPIRES_IN=604800
+
+        ________REZULTAT: un  .env configurat
+
+        Nota: Pt generarea Secret Toke folosim libraria openssl (care e deja instalata pe MacOS si Ubuntu)
+
+
+    1.2.2 creeam config/index.js care va exporta info din .env
+        ________SCOP:   creem fisierul de 
+                        config/index.js 
+                        va ciiti variabilele din .env si le pune intr-o forma organizata pt Export ca app sa le aceseze organizat
+        ________CMD:  
+            module.exports = {
+                environment: process.env.NODE_ENV || 'development',
+                port: process.env.PORT || 5000,
+                db: {
+                  username: process.env.DB_USERNAME,
+                  password: process.env.DB_PASSWORD,
+                  database: process.env.DB_DATABASE,
+                  host: process.env.DB_HOST,
+                },
+                jwtConfig: {
+                  dsecret: process.env.JWT_SECRET,
+                  dexpiresIn: process.env.JWT_EXPIRES_IN,
+                },
+
+};
+          ________REZULTAT: un  config/index.js configurat
+
+
+1.3 ////////////////////////// Sequelize Setup //////////////////////////
+
+    1.3.1 Creeam fisierul .sequlizerc pt o instalare custom a Sequelize
+
+        ________SCOP:   creem fisierul 
+                        .sequelizerc
+                        va face indica path urile pt database/migrations/models/seeders pe care Sequelize le va urma la instalare
+
+        ________CMD:  
+
+                    const path = require('path');
+                    module.exports = {
+                    config: path.resolve('config', 'database.js'),
+                    'models-path': path.resolve('db', 'models'),
+                    'seeders-path': path.resolve('db', 'seeders'),
+                    'migrations-path': path.resolve('db', 'migrations'),
+                    };
+        ________REZULTAT: un  sequelizerc.js configurat
+
+
+    1.3.2 Initializare Sequelize
+        ________SCOP: initializam Sequelize ul 
+        ________CMD:  
+                   npm sequelize init
+
+        ________REZULTAT:
+                - creaza Folder db:
+                                cu folderele: 
+                                         - migrations
+                                         - models
+                                         - seeders 
+
+                - creeaza fisierul database.js  si il add in folderul config             
+                
+
+   1.3.3 Suprascriem info din config/database.js (geneart automat in 1.3.2) cu info custom date de variabilele de environment (database/index.js preulate din .env)
+        ________SCOP: facem setarile de DB:  config/database.js cu info custom (.env)
+        ________CMD:
+            const config = require('./index');
+
+            const db = config.db;
+            const username = db.username;
+            const password = db.password;
+            const database = db.database;
+            const host = db.host;
+
+            module.exports = {
+            development: {
+                username,
+                password,
+                database,
+                host,
+                dialect: 'postgres',
+                seederStorage: 'sequelize',
+            },
+            production: {
+                use_env_variable: 'DATABASE_URL',
+                dialect: 'postgres',
+                seederStorage: 'sequelize',
+                dialectOptions: {
+                ssl: {
+                    require: true,
+                    rejectUnauthorized: false,
+                },
+                },
+            },
+            };
+
+         ________REZULTAT: config.database.js cf variabilelor de environment 
+
+
+1.4 ////////////////////////// Creem DB & USER care creeaza DB ul/ admin ul DB //////////////////////////
+
+
+    1.4.1  Creeam userul care va creea DB ul (useul e cel indicat in .env)
+
+        ________SCOP:         creeam un user in PostgreSQL (username & password furnizate comenzii trebuie sa fie identice cu cele din .env)
+        ________CMD:          psql -c "CREATE USER books_library_app PASSWORD 'books_library_app' CREATEDB"
+        ________REZULTAT:     creeaza in PostgreSQL userul care va creea DB ul 
+
+
+    1.4.2 Creeam DB ul 
+           ________SCOP:       creem DB ul (va primi numele din .env)
+           ________CMD:        npx dotenv sequelize db:create
+           ________REZULTAT:   DB s-a creeat 
+
+
+
+1.5 ////////////////////////// Express Setup //////////////////////////
+
+    1.5.1 Create and set app.js
+
+           ________SCOP:       initializam express + use middlewares pt cookie-parser/json-parser/security
+           ________CMD:        -
+
+                        const express = require('express');
+                        const morgan = require('morgan');
+                        const cors = require('cors');
+                        const csurf = require('csurf');
+                        const helmet = require('helmet');
+                        const cookieParser = require('cookie-parser');
+
+                        const { environment } = require('./config');
+                        const isProduction = environment === 'production';
+
+                        const app = express();
+
+                        app.use(morgan('dev'));
+
+                        //...some middleware
+                        app.use(cookieParser());
+                        app.use(express.json());
+
+                        // Security Middleware
+                        if (!isProduction) {
+                        app.use(cors());
+                        }
+                        // helmet helps set a variety of headers to better secure your app
+                        app.use(helmet({
+                        contentSecurityPolicy: false
+                        }));
+
+                        // Set the _csrf token and create req.csrfToken method
+                        app.use(
+                        csurf({
+                            cookie: {
+                            secure: isProduction,
+                            sameSite: isProduction && "Lax",
+                            httpOnly: true,
+                            },
+                        })
+                        );
+
+                        //...some routes
+
+
+           ________REZULTAT:   create app.js care init Express + some middleware (deocamdata)
+
+
+1.6 ////////////////////////// Routes //////////////////////////           
+
+
+
+1.6.1 Creeam folderul - routes 
+              creeam fisierul routes/index.js
+           ________SCOP:      creeam folderul routes in care se vor gasi rutele deservite de server
+                              la orice req scriem in raspuns, in cooki ul  XRF-TOKEN raspunsului valoarea req.csrfToken()
+                              intrucat acum price req are o metoda atsata tks to csurf middleware
+           ________CMD:   
+        
+                        const express = require('express');
+                        const router = express.Router();
+
+                        router.get('/hello/world', function(req, res) {
+                        res.cookie('XSRF-TOKEN', req.csrfToken());
+                        res.send('Hello World!');
+                        });
+
+                        module.exports = router;
+               ________REZULTAT:     Orice ras va avea val lui req.csrfToken()
+               nota: cookie ul _csrf_ul va fi creeat automat intrucat s -a aplivat middleware ul csurf
+
+
+
+1.7 //////////////////////////Start point of Backend:  bin/www + App connectata la db + App listen on port  //////////////////////////    
+
+           ________SCOP: Creeam fisierul bin/www
+                          Facem connex la DB si puneam app de backend sa asculte (req) pe portul 5000/setat in  .env 
+           ________CMD: 
+                            #!/usr/bin/env node
+                    // backend/bin/www
+                    const { port } = require('../config');
+
+                    const app = require('../app');
+                    const db = require('../db/models');
+
+                    // Check the database connection before starting the app
+                    db.sequelize
+                    .authenticate()
+                    .then(() => {
+                        console.log('Database connection success! Sequelize is ready to use...');
+
+                        // Start listening for connections
+                        app.listen(port, () => console.log(`Listening on port ${port}...`));
+                    })
+                    .catch((err) => {
+                        console.log('Database connection failure.');
+                        console.error(err);
+                    });
+
+           ________REZULTAT:  Am setat entry pointul in applicatie 
+
+
+1.8 //////////////////////////Add in package.json scripts//////////////////////////    
+           ________SCOP:  adaugam in package.json scripturile
+           ________CMD: 
+                  
+                    "scripts": {
+                        "sequelize": "sequelize",
+                        "sequelize-cli": "sequelize-cli",
+                        "start": "per-env",
+                        "start:development": "nodemon -r dotenv/config ./bin/www",
+                        "start:production": "node ./bin/www"
+                    }
+
+           ________REZULTAT: packeage.json are scripts 
+
+
+
+***********************************************STEP 2: API routes: /routes/api ***********************************************
+
+2.1 //////////////////////////Add API routes//////////////////////////    
+
+2.1.1 toate routes API le addaugam in routes/api/index.js
+           ________SCOP: add in routes -> folder api
+                         add in folder api file index.js
+               
+           ________CMD: 
+                  
+                    "scripts": {
+                        "sequelize": "sequelize",
+                        "sequelize-cli": "sequelize-cli",
+                        "start": "per-env",
+                        "start:development": "nodemon -r dotenv/config ./bin/www",
+                        "start:production": "node ./bin/www"
+                    }
+
+           ________REZULTAT: routes/api/index.js
+
+2.1.2 connectam /routes/api/index.js la routes/index.js
+
+           ________SCOP: ii spunem lui /routes/index.js sa foloseasca routele din  routes/api/index.js
+               
+           ________CMD: 
+                  const apiRouter = require('./api');
+
+                  router.use('/api', apiRouter)
+
+           ________REZULTAT: backend va servi si rutele din routes/api/index care au url .../api/
+
+>>>>>>>>testare >>>>>>>>>>
+      .) in  /routes/api/index.js add:
+                   router.post('/test', function(req, res) {
+                    res.json({ requestBody: req.body });
+                  });
+
+       ..) in browser -> console Tab testam: 
+                fetch('/api/test', {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "XSRF-TOKEN": `<value of cookie Brower: application tab/ cookies/ XSRF-TOKEN cookie>`
+                        },
+                        body: JSON.stringify({ hello: 'world' })
+            }).then(res => res.json()).then(data => console.log(data));
+
+
+
+
+
+***********************************************STEP 3: Error Handeling  Middleware in app.js***********************************************
+    
+3.1 //////////////////////////Error-Handler pt: Resource Not Found  ////////////////////////// 
+
+           ________SCOP: Add error handeling pentru un url care nu e implementat in backend
+               
+           ________CMD: 
+                    app.use((_req, _res, next) => {
+                        const err = new Error("The requested resource couldn't be found.");
+                        err.title = "Resource Not Found";
+                        err.errors = ["The requested resource couldn't be found."];
+                        err.status = 404;
+                        next(err);
+                    });
+
+           ________REZULTAT: middleware care preia err pt req.URL uri neimplementate si o da mai departe pt Error-Formatting Middleware
+
+3.2 //////////////////////////Error-Handler pt: Sequelize  ////////////////////////// 
+        
+           ________SCOP: Add error handeling pentru un url pt a prinde errors de la Sequelize prin testare daca errorile sunt obiecte ValidationError
+                   
+           ________CMD:   const { ValidationError } = require('sequelize');
+                      // Process sequelize errors
+                      app.use((err, _req, _res, next) => {
+                          // check if error is a Sequelize error:
+                          if (err instanceof ValidationError) {
+                             err.errors = err.errors.map((e) => e.message);
+                             err.title = 'Validation error';
+                            }
+                          next(err);
+                        });
+           ________REZULTAT: middleware pt err de Sequelize de tip ValidationError va fi invocat
+
+
+3.3 //////////////////////////Error-Handler pt: formatarea tuturor erorilor ////////////////////////// 
+        
+           ________SCOP: pt orice errore, formatam JSON  response (care va contine errori inainte sa il trimitem)
+                   
+           ________CMD:   
+           // Error formatter
+                app.use((err, _req, res, _next) => {
+                res.status(err.status || 500);
+                console.error(err);
+                res.json({
+                    title: err.title || 'Server Error',
+                    message: err.message,
+                    errors: err.errors,
+                    stack: isProduction ? null : err.stack,
+                });
+                });
+           ________REZULTAT: middleware pt a asigura un raspuns JSON cu acceasi structura (title,  erorrs) in cazul in care o err este
+
+
+          NOTA: un middleware care invoca:
+                          - next()     // totul e in regula(nu exista errori) nu va fi invocat nici un alt middleware pt errors
+                          - next(err)  // avem err si celelete middlewares pt errori vor fi deasemenea invocate
+
+
+
+
+                    
+***********************************************STEP 4: TABLE Users***********************************************
+
+4.1 //////////////////////////Add table Users//////////////////////////    
+
+        4.1.1
+           ________SCOP: Creeam tabela Users cu coloanele avand atributele:
+               
+                    id:	                integer	not null, primary key
+                    firstName:          string	not null, max 150 characters
+                    lastName:           string	not null, max 150 characters
+                    type:               string, not null, 1 char (R - Reader , W - Worker) default value 'R'
+                    username:	        string	not null, indexed, unique, max 30 characters
+                    email:	            string	not null, indexed, unique, max 256 characters
+                    hashedPassword: 	binary string	not null
+                    createdAt:	        datetime	not null, default value of now()
+                    updatedAt:	        datetime	not null, default value of now()
+                   
+           ________CMD:  
+               npx sequelize model:generate --name User --attributes firstNname:string,lastNname:string,type:string,username:string,email:string,hashedPassword:string
+
+           ________REZULTAT: ca creeaza:
+                       models/user.js
+                       migrations/TS-create-user.js
+                       
+
+           Nota: numele tabelei in npx se da la singular si se va creea la plurar in DB!
+
+
+        4.1.2 
+               ________SCOP: ADD DB-level constraints pt tabela Users
+  
+                 Pregatim fisierul migrations/Users inainte de a creea tb in DB 
+                 Completam atributele constraints in coloane
+                 - aplicam  attribute in cols: 
+                        pt String => length, 
+                        pt Date => default ( Sequelize.fn('now'))
+                        allowNuls: false
+        
+      
+                ________CMD: 
+            'use strict';
+            module.exports = {
+            up: (queryInterface, Sequelize) => {
+                return queryInterface.createTable('Users', {
+                id: {
+                    allowNull: false,
+                    autoIncrement: true,
+                    primaryKey: true,
+                    type: Sequelize.INTEGER
+                },
+                firstName: {
+                    type: Sequelize.STRING(150),
+                    allowNull: false,
+                },
+                lastName: {
+                    type: Sequelize.STRING(150),
+                    allowNull: false,
+                },
+                type: {
+                    type: Sequelize.STRING(1),
+                    allowNull: false,
+                    defaultValue: "R"
+                }, 
+                username: {
+                    type: Sequelize.STRING(30),
+                    allowNull: false,
+                    unique: true,
+                },
+                email: {
+                    type: Sequelize.STRING(256),
+                    allowNull: false,
+                    unique: true,
+                },
+                hashedPassword: {
+                    type: Sequelize.STRING.BINARY,
+                    allowNull: false,
+                },
+                createdAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                    defaultValue: Sequelize.fn('now'),
+                },
+                updatedAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                    defaultValue: Sequelize.fn('now'),
+                }
+                });
+            },
+            down: (queryInterface, Sequelize) => {
+                return queryInterface.dropTable('Users');
+            }
+            };
+                
+      
+            ________REZULTAT: fis User pt migration e gata de a fi migrat pt a creea Tb in DB
+
+            4.1.3 - Adaugam Tabela Users in DB
+                    ________SCOP:   ADD table Users in DB
+                    ________CMD:  npx dotenv sequelize db:migrate
+                         npx dotenv sequelize db:migrate
+                    ________REZULTAT: in DB avem TB users
+
+
+              Nota: unde avem o comanda 'sequelize db: ' bagam si dotenv 
+
+
+
+            4.1.4 - ADD model-level constraints pt tabela Users
+                    ________SCOP:  ADD constraints pentu modelul Users 
+                    ________CMD:  'use strict';
+                                const { Validator } = require('sequelize');
+
+                                module.exports = (sequelize, DataTypes) => {
+                                const User = sequelize.define('User', {
+                                      firstName: {
+                                    type: DataTypes.STRING,
+                                    allowNull: false,
+                                    validate: {
+                                        len: [1, 150]
+                                    },
+                                    },
+                                    lastName: {
+                                    type: DataTypes.STRING,
+                                    allowNull: false,
+                                    validate: {
+                                        len: [1, 150]
+                                    },
+                                    },
+                                    type: {
+                                    type: DataTypes.STRING,
+                                    validate: {
+                                        len: [1, 1]
+                                    },
+                                    },
+                                    username: {
+                                    type: DataTypes.STRING,
+                                    allowNull: false,
+                                    validate: {
+                                        len: [4, 30],
+                                        isNotEmail(value) {
+                                        if (Validator.isEmail(value)) {
+                                            throw new Error('Cannot be an email.');
+                                        }
+                                        },
+                                    },
+                                    },
+                                    email: {
+                                    type: DataTypes.STRING,
+                                    allowNull: false,
+                                    validate: {
+                                        len: [3, 256]
+                                    },
+                                    },
+                                    hashedPassword: {
+                                    type: DataTypes.STRING.BINARY,
+                                    allowNull: false,
+                                    validate: {
+                                        len: [60, 60]
+                                    },
+                                    },
+                                }, {});
+                                User.associate = function(models) {
+                                    // associations can be defined here
+                                };
+                                return User;
+                                };
+                    ________REZULTAT: in modelul users avem constraints
+
+
+  
+
+
+
+
+            4.1.5 - creeam fisierul Seed demo-user pt tb Users in DB
+                    ________SCOP:   ADD seed table pt tb User 
+                    ________CMD: 
+                                npx sequelize seed:generate --name demo-user
+                     
+                    ________REZULTAT: db/seeders/TS-demo-user.js
+
+
+              Nota: unde avem o comanda 'sequelize db: ' bagam si dotenv 
+
+
+            4.1.6 - populam fisiwrul Seed demo-user  cu date
+                    ________SCOP:   put data in  seed fileul Tb User  
+                    ________CMD: 
+                                npx sequelize seed:generate --name demo-user
+                     
+                    ________REZULTAT: db/seeders/TS-demo-user.js
+
+
+         
+
+            
+
+
+
+***********************************************STEP 5: fc declarate pe models/TS-user.js ***********************************************
+
+5.1 Add an instance method care va compara parola primita cu care care e in baza sa vada daca sunt identice
+
+            ________SCOP:  add validatePassword method In Users model
+            ________CMD: 
+                        User.prototype.validatePassword = function (password) {
+                             return bcrypt.compareSync(password, this.hashedPassword.toString());
+                        };
+                     
+            ________REZULTAT: e creata functia de validatePassword (vs DBpasword hashuita)
+
+5.2 Add an instance method care return an object doar cu info care sunt safe sa fie in JWT TOKEN
+
+            ________SCOP:  creem fc .toSafeObject  care selectAZA info pe care le returneaza in OBj care va fi trimis la playload in TOKEN
+            ________CMD: 
+                         User.prototype.toSafeObject = function() { 
+                            const { id, firstName, lastName, type ,username, email } = this; 
+                             return { id, firstName, lastName , type ,username, email };
+                        };
+                     
+            ________REZULTAT: e creata functia toSafeObject care va selecta ce info se duc in JWT TOKEN
+
+
+5.3 Add a static method getUserById care retureza userul cu resp Id
+
+            ________SCOP:  creem fc .toSafeObject  care selectAZA info pe care le returneaza in OBj care va fi trimis la playload in TOKEN
+            ________CMD: User.getCurrentUserById = async function (id) {
+                             return await User.scope('currentUser').findByPk(id);
+                         };
+            ________REZULTAT: e creata functia getUserById 
+
+5.4 Add a static method login care va loga userul daca pwd e 'al din DB
+
+            ________SCOP:  creem fc .login ai parola intri/ nu ai nu intri in app
+            ________CMD: User.login = async function ({ credential, password }) {
+                            const { Op } = require('sequelize');
+                            const user = await User.findOne({
+                                where: {
+                                [Op.or]: {
+                                    username: credential,
+                                    email: credential,
+                                },
+                                },
+                            });
+                            if (user && user.validatePassword(password)) {
+                                return await User.findByPk(user.id);
+                            }
+                            };
+
+            ________REZULTAT: e creata functia: login 
+
+
+5.5 Add a static method signup care va inregistra un user - toti userii inregistrati online/ din afara aplicatiei vor fi de tip reader
+
+            ________SCOP:  creem fc .signup ai parola intri/ nu ai nu intri in app
+            ________CMD: 
+                        User.signup = async function ({ username, email, password }) {
+                            const hashedPassword = bcrypt.hashSync(password);
+                            const user = await User.create({
+                            username,
+                            email,
+                            hashedPassword,
+                            });
+                            return await User.findByPk(user.id);
+                        };  
+
+            ________REZULTAT: e creeata fc sign:up
+
+
+***********************************************STEP 6: User Auth middlewares ***********************************************
+
+6.0 creeam folderul utils 
+            -> creem auth.js in interiorul utils/
+
+       Nota: /utils/auth.js - will be the playground for auth Symphony
+
+6.1 
+        ________SCOP:  creem fc SetTokenCookie.  Generam un token  pe baza secret key (JWT secret) pe care il salvam intr-un cookie numit token. 
+        ________CMD: 
+                      
+                // Sends a JWT Cookie
+                const setTokenCookie = (res, user) => {
+
+                // Create the token.
+                const token = jwt.sign(
+                    { data: user.toSafeObject() },
+                    secret,
+                    { expiresIn: parseInt(expiresIn) }, // 604,800 seconds = 1 week
+                );
+
+                const isProduction = process.env.NODE_ENV === "production";
+
+                // Set the token cookie
+                res.cookie('token', token, {
+                    maxAge: expiresIn * 1000, // maxAge in milliseconds
+                    httpOnly: true,
+                    secure: isProduction,
+                    sameSite: isProduction && "Lax",
+                });
+
+                return token;
+                };
+
+            ________REZULTAT: e creeata fc SetTokenCookie
+
+
+6.2
+             ________SCOP:  creem fc restoreUser.  
+             ________CMD: 
+
+                        const restoreUser = (req, res, next) => {
+                        // token parsed from cookies
+                        const { token } = req.cookies;
+
+                        return jwt.verify(token, secret, null, async (err, jwtPayload) => {
+                            if (err) {
+                            return next();
+                            }
+
+                            try {
+                            const { id } = jwtPayload.data;
+                            req.user = await User.scope('currentUser').findByPk(id);
+                            } catch (e) {
+                            res.clearCookie('token');
+                            return next();
+                            }
+
+                            if (!req.user) res.clearCookie('token');
+
+                            return next();
+                        });
+                        };
+             ________REZULTAT: e creeata fc restoreUser
+
+6.3
+             ________SCOP: creeam fc requireAuth
+             ________CMD: 
+              const requireAuth = [
+                    restoreUser,
+                    function (req, res, next) {
+                        if (req.user) return next();
+
+                        const err = new Error('Unauthorized');
+                        err.title = 'Unauthorized';
+                        err.errors = ['Unauthorized'];
+                        err.status = 401;
+                        return next(err);
+                    },
+                    ];
+             ________REZULTAT: e creeata fc requireAuth
+
+
+***********************************************STEP 7: Routes for User Auth ***********************************************
+
+7.0 in routes/api/ creem:
+    - session.js  
+          -login
+          -logout
+          - getUser
+    - users.js
+           -signup
+           
+
+7.1  
+               ________SCOP: creeam in session.js route pt login  /api/session/ - POST
+               ________CMD: 
+                        router.post(
+                    '/',
+                    asyncHandler(async (req, res, next) => {
+                        const { credential, password } = req.body;
+
+                        const user = await User.login({ credential, password });
+
+                        if (!user) {
+                        const err = new Error('Login failed');
+                        err.status = 401;
+                        err.title = 'Login failed';
+                        err.errors = ['The provided credentials were invalid.'];
+                        return next(err);
+                        }
+
+                        await setTokenCookie(res, user);
+
+                        return res.json({
+                        user,
+                        });
+                    }),
+                    );
+
+                         TEST:
+                                fetch('/api/session', {
+                                    method: 'POST',
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "XSRF-TOKEN": `JNJlRRTo-pmC94_oTCD9IH-02fF7XCyqLZ3c`
+                                    },
+                                    body: JSON.stringify({
+                                        credential: 'spider@y.com',
+                                        password: 'spider'
+                                    })
+                                    }).then(res => res.json()).then(data => console.log(data));
+
+                                    Nota: credentialul primeste fie un email fie un username
+
+                ________REZULTAT: e creeat routerul de login: /api/session - POST
+
+
+
+7.2  
+               ________SCOP: creeam in session.js route pt log out   e creeat routerul de login: /api/session - DELETE
+               ________CMD: 
+                                
+                        // Log out
+                        router.delete(
+                        '/',
+                        (_req, res) => {
+                            res.clearCookie('token');
+                            return res.json({ message: 'success' });
+                        }
+                        );
+
+
+                        Test: in Chrome-Brower
+                                                fetch('/api/session', {
+                                                        method: 'DELETE',
+                                                        headers: {
+                                                            "Content-Type": "application/json",
+                                                            "XSRF-TOKEN": `<value of XSRF-TOKEN cookie>`
+                                                        }
+                                                        }).then(res => res.json()).then(data => console.log(data));
+
+                ________REZULTAT: e creeat routerul de login: /api/session - DELETE
+
+
+
+
+7.3
+               ________SCOP: creeam in users.js route pt signup new user  /api/users - POST 
+               ________CMD: 
+                              
+                            // Sign up
+                            router.post(
+                                    '/',
+                                    asyncHandler(async (req, res) => {
+                                        console.log('____HERE____');
+                                        const { firstName, lastName, type, email, password, username } = req.body;
+                                        const user = await User.signup({ firstName, lastName, type, email, username, password });
+
+                                        await setTokenCookie(res, user);
+
+                                        return res.json({
+                                        user,
+                                        });
+                                    }),
+                            );
+
+
+                          Test:
+                           
+                                fetch('/api/users', {
+                                    method: 'POST',
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "XSRF-TOKEN": `JNJlRRTo-pmC94_oTCD9IH-02fF7XCyqLZ3c`
+                                    },
+                                    body: JSON.stringify({
+                                        firstName: 'Spider',
+                                        lastName: 'Man',
+                                        type: 'R',
+                                        email: 'spider@y.com',
+                                        username: 'spider',
+                                        password: 'spider'
+                                    })
+                                    }).then(res => res.json()).then(data => console.log(data));
+
+                ________REZULTAT: e creeat routerul de signup new user : /api/users - POST      
+
+
+7.4
+               ________SCOP: creeam in users.js route pt recuperarea userului de pe sessiune   /api/session - GET 
+               ________CMD: // Restore session user
+                                router.get(
+                                '/',
+                                restoreUser,
+                                (req, res) => {
+                                    const { user } = req;
+                                    if (user) {
+                                    return res.json({
+                                        user: user.toSafeObject()
+                                    });
+                                    } else return res.json({});
+                                }
+                                );
+               ________REZULTAT: e creeat routerul de signup new user :  /api/session - GET   
+                              
+                              
+
+***********************************************STEP 8: Validating the Request Body ***********************************************
+
+
+8.0
+               ________SCOP:  add file validation.js in folderul utils => /utils/validation.js 
+                              add fc handleValidationErrors care face validarile cf ce declaratii e in check (fc de validare) user declarat
+               ________CMD: 
+                                    const { validationResult } = require('express-validator');
+
+                                    // middleware for formatting errors from express-validator middleware
+                                    // (to customize, see express-validator's documentation)
+                                    const handleValidationErrors = (req, _res, next) => {
+                                    const validationErrors = validationResult(req);
+
+                                    if (!validationErrors.isEmpty()) {
+                                        const errors = validationErrors
+                                        .array()
+                                        .map((error) => `${error.msg}`);
+
+                                        const err = Error('Bad request.');
+                                        err.errors = errors;
+                                        err.status = 400;
+                                        err.title = 'Bad request.';
+                                        next(err);
+                                    }
+                                    next();
+                                    };
+
+                                    module.exports = {
+                                    handleValidationErrors,
+                                    };
+
+
+              ________REZULTAT: e creeat fisierul utils/validation.js care verifica dc sunt err cf validarilor si intoare errors dc sunt
+
+
+
+    8.1  Validare Login-     validam  body -ul requestului de login cu validateLogin
+               ________SCOP:  apelam in api/session - POST fc handleValidationErrors si check
+               ________CMD: 
+                            const validateLogin = [
+                                    check('credential')
+                                        .exists({ checkFalsy: true })
+                                        .notEmpty()
+                                        .withMessage('Please provide a valid email or username.'),
+                                    check('password')
+                                        .exists({ checkFalsy: true })
+                                        .withMessage('Please provide a password.'),
+                                    handleValidationErrors,
+                ];
+
+                + folosim just created middleware ul validateLogin pentru POST (/api/session - POST):
+                  // Log in
+                       router.post(
+                                     '/',
+                                     validateLogin,  // here we insert the validateLogin middleware
+                                     asyncHandler(async (req, res, next) => {
+
+
+                     Test:            
+                          fetch('/api/session', {
+                                method: 'POST',
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "XSRF-TOKEN": `<value of XSRF-TOKEN cookie>`
+                                },
+                                body: JSON.stringify({ credential: '', password: 'password' })
+                                }).then(res => res.json()).then(data => console.log(data));
+
+               ________REZULTAT: nu se trimite la server req de login/ conecarea unui user care nu statifac validation pt campurile conectare
+
+
+
+    8.2  Validare Signup-     validam  body -ul requestului de signup cu validateSignup
+               ________SCOP:  apelam in api/users - POST fc handleValidationErrors si check
+               ________CMD: 
+                            const validateSignup = [
+                                    const validateSignup = [
+                                    check('firstName')
+                                        .exists({ checkFalsy: true })
+                                        .isLength({ min: 4, max: 150 })
+                                        .withMessage('Please provide a first name with at least 1 character.'),
+                                    check('lastName')
+                                        .exists({ checkFalsy: true })
+                                        .isLength({ min: 4, max: 150 })
+                                        .withMessage('Please provide a last name with at least 1 character.'),
+                                    check('email')
+                                        .exists({ checkFalsy: true })
+                                        .isEmail()
+                                        .withMessage('Please provide a valid email.'),
+                                    check('username')
+                                        .exists({ checkFalsy: true })
+                                        .isLength({ min: 4 })
+                                        .withMessage('Please provide a username with at least 4 characters.'),
+                                    check('username')
+                                        .not()
+                                        .isEmail()
+                                        .withMessage('Username cannot be an email.'),
+                                    check('password')
+                                        .exists({ checkFalsy: true })
+                                        .isLength({ min: 6 })
+                                        .withMessage('Password must be 6 characters or more.'),
+                                    handleValidationErrors,
+                                    ];
+
+                + folosim just created middleware ul validateSignup pentru POST (/api/users - POST):
+                  // Log in
+                       router.post(
+                                     '/',
+                                     validateSignup,  // here we insert the validateLogin middleware
+                                     asyncHandler(async (req, res, next) => {
+
+
+                     Test:            
+                          fetch('/api/users', {
+                                method: 'POST',
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "XSRF-TOKEN": `<value of XSRF-TOKEN cookie>`
+                                },
+                                body: JSON.stringify({ firstName: '', 
+                                                        lastName: '', 
+                                                        type: 'R', 
+                                                        email: '', 
+                                                        username: '' ,
+                                                        password: 'password' })
+                                }).then(res => res.json()).then(data => console.log(data));
+
+               ________REZULTAT: nu se trimite la server req pt intregistrarea unui nou user care nu statifac validations pe campurile complete

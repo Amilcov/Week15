@@ -59,8 +59,8 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   User.prototype.toSafeObject = function() { 
-    const { id, username, email } = this; 
-    return { id, username, email };
+    const { id, firstName, lastName, type ,username, email } = this; 
+    return { id, firstName, lastName , type ,username, email };
   };
 
   User.prototype.validatePassword = function (password) {
@@ -86,9 +86,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
 
-  User.signup = async function ({ username, email, password }) {
+  User.signup = async function ({ firstName, lastName, type, username, email, password }) {
     const hashedPassword = bcrypt.hashSync(password);
     const user = await User.create({
+      firstName, 
+      lastName, 
+      type,
       username,
       email,
       hashedPassword,
