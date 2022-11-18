@@ -1,0 +1,96 @@
+1. npx create-react-app . --template @appacademy/react-v17 --use-npm
+
+2. npm install
+    js-cookie 
+    react-redux
+    react-router-dom
+    redux
+    redux-thunk
+
+   npm install -D
+     redux-logger
+
+3. ****************************SETUP Store****************************
+
+  3.1 --> create store folder in / src
+      ---> create index.js in store
+
+
+  3.2 in store/index.js:
+     - declaram reducer ul
+     - declaram enhancer ul
+     - creeam store  ul
+
+   4.  ****************************App.js creem Store ul ****************************
+
+
+
+            // frontend/src/index.js
+          import React from 'react';
+
+          import './index.css';
+
+          import ReactDOM from 'react-dom';
+          import { Provider } from 'react-redux';
+          import { BrowserRouter } from 'react-router-dom';
+          import App from './App';
+
+          import configureStore from './store';
+
+          const store = configureStore();
+
+          if (process.env.NODE_ENV !== 'production') {
+          window.store = store;
+          }
+
+          function Root() {å
+          return (
+          <Provider store={store}>
+          <BrowserRouter>
+          <App />
+          </BrowserRouter>
+          </Provider>
+          );
+          };
+
+          ReactDOM.render(
+          <React.StrictMode>
+          <Root />
+          </React.StrictMode>,
+          document.getElementById('root'),
+          );
+
+
+
+5  ****************************Wrapping fetch requests with CSRF  ****************************
+
+    5.0 
+        pt ca Express Serverul in backend e configurat sa fie CSRF protected 
+            serverul va accepta dor requesturi care au:
+              - in header: tokenul secret(XSRF-TOKEN)
+              - in cookie: numit token (cu info token care e unic/ request)
+
+
+   5.1 ADD in package.js -          
+         'proxy': 'http://localhost:5000'
+
+         astfel incat toate cererile vor fi deservite de backend
+
+
+   5.2 add src/store/csrf.js
+        care va extrage din cookie ul XSRF-TOKEN si il va atasa la orice cerere
+
+   5.3 mic artificiu pt k production  !== development si at adaugam secventa pt // static routes in backend routes/index.js
+   (in development: bkend server is on separte server than frontend
+    in production: the backend also servers all asstes for front end )     
+
+
+   5.4
+
+   
+
+
+
+
+
+
