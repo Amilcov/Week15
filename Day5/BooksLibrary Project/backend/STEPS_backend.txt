@@ -618,7 +618,7 @@ STEPS BackEnd:
 
 ***********************************************STEP 5: fc declarate pe models/TS-user.js ***********************************************
 
-5.1 Add an instance method care va compara parola primita cu care care e in baza sa vada daca sunt identice
+5.1 Add an instance method  validatePassword  care va compara parola primita cu care care e in baza sa vada daca sunt identice
 
             ________SCOP:  add validatePassword method In Users model
             ________CMD: 
@@ -642,7 +642,7 @@ STEPS BackEnd:
 
 5.3 Add a static method getUserById care retureza userul cu resp Id
 
-            ________SCOP:  creem fc .toSafeObject  care selectAZA info pe care le returneaza in OBj care va fi trimis la playload in TOKEN
+            ________SCOP:  creem fc .getUserById  care selectAZA info pe care le returneaza user ul obj cu id ul resp 
             ________CMD: User.getCurrentUserById = async function (id) {
                              return await User.scope('currentUser').findByPk(id);
                          };
