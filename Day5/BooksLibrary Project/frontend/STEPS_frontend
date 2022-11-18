@@ -83,9 +83,53 @@
    5.3 mic artificiu pt k production  !== development si at adaugam secventa pt // static routes in backend routes/index.js
    (in development: bkend server is on separte server than frontend
     in production: the backend also servers all asstes for front end )     
+    5.3.1 modify  backend/rotes/index.js ca sa add cookie ul numit XSRF-TOKEN
 
 
-   5.4
+  6. Login Form Page
+     6.1 in  src./store/ session.js  declaram session Action & reduceres
+
+
+     6.2  test window.store.dispatch(window.sessionActions.login({
+        credential: 'adriana',
+        password: 'adriana'
+      }));
+
+
+
+7.Login Form Component
+   add src/ components/LoginFormPage/indedx.js/\
+
+8. Signup Form
+ test
+ window.store.dispatch(window.sessionActions.signup({
+  firstName: 'reader1',
+  lastName: 'reader1',
+  username: 'reader1',
+  email: 'reader1w@y.com',
+  password: 'reader1'
+}));
+
+9. Signup Component 
+
+
+10. Logout  Action Component 
+     Test  in : chrome console dev tools
+       window.store.dispatch(window.sessionActions.logout());    
+       
+          
+11. Navigation Component
+
+
+
+
+
+
+
+
+
+
+
 
    
 
