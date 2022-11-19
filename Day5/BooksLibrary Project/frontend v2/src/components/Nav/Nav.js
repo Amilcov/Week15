@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom';
 import './Nav.css'
 
 
@@ -15,15 +16,15 @@ function Nav() {
           <div class="collapse navbar-collapse" id="navbarText">
             <ul class="navbar-nav mr-auto">
               <li className="nav-item">
-                <a className="nav-link" href="/transactions"> Books </a>
+                <NavLink className="nav-link" to="/books"> Books </NavLink>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/transactions"> Readers </a>
+                <NavLink className="nav-link" to="/readers"> Readers </NavLink>
               </li>
               </ul>
               <span className="navbar-text px-4">
-                <a className="btn btn-sm btn-dark mr-2" href="/login"> Login </a>
-                <a className="btn btn-sm btn-dark" href="/signup"> Register </a>
+                <NavLink className="btn btn-sm btn-dark mr-2" to="/login"> Login </NavLink>
+                <NavLink className="btn btn-sm btn-dark" to="/signup"> Register </NavLink>
             </span>
            </div>
         </nav>
