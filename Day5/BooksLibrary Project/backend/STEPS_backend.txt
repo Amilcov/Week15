@@ -605,7 +605,7 @@ STEPS BackEnd:
             4.1.6 - populam fisiwrul Seed demo-user  cu date
                     ________SCOP:   put data in  seed fileul Tb User  
                     ________CMD: 
-                                npx sequelize seed:generate --name demo-user
+                               npx dotenv sequelize db:seed:all
                      
                     ________REZULTAT: db/seeders/TS-demo-user.js
 
