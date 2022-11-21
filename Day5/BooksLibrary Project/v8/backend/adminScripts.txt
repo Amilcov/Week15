@@ -1,0 +1,16 @@
+//PRE:  se copiaza arhiva -> extract -> open terminal in calea /backend (dir extras din arhiva):
+0.
+     npm install
+
+1. 
+    psql -c "CREATE USER books_library_app PASSWORD 'books_library_app' CREATEDB"
+
+2.    
+    npx dotenv sequelize db:create
+
+
+3.    
+    npx dotenv sequelize db:migrate
+   
+4. 
+    npx dotenv sequelize db:seed:all 
