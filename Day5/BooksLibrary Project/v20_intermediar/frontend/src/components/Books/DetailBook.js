@@ -104,7 +104,6 @@ function DetailBook() {
                     <td key="3">{author.CNP} </td> 
                     <td key="4">{author.about}</td>
                     <td className="btn btn-danger"> Delete</td>
-                    <td> <NavLink className="btn btn-primary" to={`/book/${bookId}/author/${author.id}`}>Details</NavLink> </td>
                   </tr> )} 
              </tbody> 
       
