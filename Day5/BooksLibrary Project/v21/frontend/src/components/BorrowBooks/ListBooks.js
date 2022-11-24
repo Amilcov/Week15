@@ -2,7 +2,7 @@ import { useAppContext } from "../../context/AppContext";
 import { NavLink } from 'react-router-dom';
 import { useState , useEffect} from 'react';
 
- function ListBooks() {
+ function ListBorrowBooks() {
   
     const token = localStorage.getItem('BOOKS_LIBRARY_ACCESS_TOKEN');
     const { userToken, userTypeContext} = useAppContext();
@@ -78,4 +78,4 @@ import { useState , useEffect} from 'react';
 }
 
 
-export default ListBooks;
+export default ListBorrowBooks;
