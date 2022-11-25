@@ -40,7 +40,7 @@ import { useState , useEffect} from 'react';
         <>
         <p></p>
         <div className="container"> 
-          <h2 className="py-2">Books</h2>
+          <h2 className="py-2">Borrow Books</h2>
           <div className="errors-container">
                 { errors.length > 0 && (
                   <ul className='alert alert-danger'>

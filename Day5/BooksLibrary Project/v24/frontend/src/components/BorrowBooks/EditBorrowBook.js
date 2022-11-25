@@ -4,6 +4,7 @@ import { useParams, NavLink, useNavigate } from 'react-router-dom';
 
 function EditBorrowBook() {
     const { borrowBookId } = useParams();
+  
     const token = localStorage.getItem('BOOKS_LIBRARY_ACCESS_TOKEN');
     const userId = localStorage.getItem('BOOKS_LIBRARY_USERID');
     const navigate = useNavigate();
@@ -77,7 +78,8 @@ function EditBorrowBook() {
 
 
           async function getBorrowBook() {
-           
+        
+              console.log('0.edit borrowBookId', borrowBookId);
               try{
                 const response = await fetch(`/borrowbooks/${borrowBookId}`, {
                    headers: {
@@ -85,16 +87,23 @@ function EditBorrowBook() {
                    }
                 });
 
-                const data = await response.json();
-                const borrowBook = data.borrowBooks;
 
-                borrowBook[0].all_authors = borrowBook.map(record => record.author_firstname + ' ' + record.author_lastname ). join(', ') ||'';
-                setBorrowBookD(borrowBook[0]);
-                setBookId(borrowBookD.bookId);
-                setReaderId(borrowBookD.readerId);
-                setStartDate(borrowBookD.startDate);
-                setReturnDate(borrowBookD.returnDate);
-                setEndDate(borrowBookD.endDate);
+                const data = await response.json();
+                console.log('data:',data);
+                const borrowBooks = data.borrowBooks;
+                console.log( '12. borrowBook', borrowBooks);
+                  const elem = borrowBooks[0];
+              console.log('15 - elem', elem);
+                //borrowBook[0].all_authors = borrowBook.map(record => record.author_firstname + ' ' + record.author_lastname ). join(', ') ||'';
+                setBorrowBookD(borrowBooks[0]);
+                console.log('10. borrowBookD', borrowBookD);
+                //setBookId(borrowBookD.bookId);
+                setBookId(elem.bookId);
+
+                setReaderId(elem.readerId);
+                setStartDate(elem.startDate);
+                setReturnDate(elem.returnDate);
+                setEndDate(elem.endDate);
                 
               } catch(err) {
                  if (err && err.errors) setValidateErrors(err.errors);
@@ -106,6 +115,8 @@ function EditBorrowBook() {
              
       
      }, [])
+
+
 
     async function onSubmit(e) {
        e.preventDefault();
