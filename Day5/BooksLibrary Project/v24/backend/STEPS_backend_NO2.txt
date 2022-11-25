@@ -127,3 +127,6 @@ npx dotenv sequelize db:migrate
 > --name BorrowBook \
 > --attributes userId:integer,bookId:integer,readerId:integer,startDate:dateonly,endDate:dateonly,returnDate:dateonly 
 
+10. npx sequelize model:generate \
+--name Setting \
+--attributes name:string,address:string,email:string,web:string,yearOpened:integer
