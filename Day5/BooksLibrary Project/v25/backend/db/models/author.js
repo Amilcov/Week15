@@ -17,12 +17,13 @@ module.exports = (sequelize, DataTypes) => {
 
       Author.belongsToMany(models.Book, mappingColumns);
   
-         
+     
       const mappingColumns2 = {
-        through: "BookAuthor2",
+        through: "BookAuthor",
         foreignKey: 'authorId',
         otherKey: 'bookId',
       };
+    
 
       Author.belongsToMany(models.BorrowBook, mappingColumns);
     
