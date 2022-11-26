@@ -115,11 +115,11 @@ function DetailBook() {
            <table className="table table-striped table-hover">
              <thead className="thead-dark">
                <tr>
-                 <th> First Name </th>
-                 <th> Last Name </th>
-                 <th> CNP </th>
-                 <th> About </th>
-                 <th></th>
+                 <th key="1"> First Name </th>
+                 <th key="2"> Last Name </th>
+                 <th key="3"> CNP </th>
+                 <th key="4"> About </th>
+                 <th key="5"></th>
               </tr>
              </thead>   
              <tbody>

@@ -50,11 +50,11 @@ import { useState , useEffect} from 'react';
             <table className="table table-striped table-hover">
               <thead className="thead-dark">
                <tr>
-                 <th> Last Name </th>
-                 <th> First Name </th>
-                 <th> CNP </th>
-                 <th> About</th>
-                 <th> </th>
+                 <th key="1"> Last Name </th>
+                 <th key="2"> First Name </th>
+                 <th key="3"> CNP </th>
+                 <th key="4"> About</th>
+                 <th key="5"> </th>
                </tr> 
               </thead>   
               <tbody>

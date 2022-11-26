@@ -52,9 +52,9 @@ import { useState , useEffect} from 'react';
             <table className="table table-striped table-hover">
               <thead className="thead-dark">
                <tr>
-                 <th> Title</th>
-                 <th> Authors </th>
-                 <th> Max Borrow Days </th>
+                 <th key="1"> Title</th>
+                 <th key="2"> Authors </th>
+                 <th key="3"> Max Borrow Days </th>
                  <th> </th>
                </tr> 
               </thead>   
