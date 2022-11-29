@@ -1,0 +1,8 @@
+ li.bullet{
+    list-style: disc;
+}
+ 
+
+#btn_del_author_row {
+  padding: 6px 12px;
+}
