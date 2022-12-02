@@ -1,0 +1,23 @@
+1.
+
+    OK:  className={styles.clsA}
+    !OK:  className='styles.clsA'
+           
+           context: css-module 
+                         A1.module.css: 
+                                    .clsA1 {color: red}
+
+                         A1.js: 
+                                   import styles from './A1.module.css'
+                                       ....
+                                      <h1 className={style.clsA1}> Hello </h1>
+
+
+
+
+
+2. 
+
+  OK: class My1 extends React.Component {}
+ !OK: class My1 extends React.Component() {}
+
