@@ -1,0 +1,42 @@
+h3 {
+    margin-left: 40px;
+}
+
+.programs-list {
+    display: flex; 
+    flex-direction: column;
+}
+
+.programs-list li {
+    margin-bottom: 8px;
+    width: 400px;
+    display: flex;
+    /* justify-content: space-between; */
+    justify-content: left;
+    align-items: center;
+    font-size: 18px;
+    border: 1px solid gray;
+    border-radius: 16px;
+    padding: 16px;
+    background-color: RGB(68, 184, 172); 
+    /* WINNER RGB(68, 184, 172); */
+
+/* RGB(85, 180, 176); */
+
+
+    /* RGB(0, 149, 182); */
+    /* RGB(8, 143, 143); */
+    /* #38954b; */
+    /* #46b1cb; */
+    /* #53b1c8; */
+    /* #62b2c6; */
+    /* rgb(29, 202, 189); */
+}
+
+
+@media only screen and (max-width: 600px) {
+  .programs-list li {
+    width: 200px;
+    padding: 10px;
+  }
+}
