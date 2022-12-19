@@ -1,0 +1,31 @@
+[
+    {
+        "id": 1,
+        "name": "Pilates",
+        "picture": "pilates.ico"
+    },  {
+        "id": 2,
+        "name": "Gym",
+        "picture": "gym.ico"
+    },  {
+        "id": 3,
+        "name": "Running",
+        "picture": "running.ico"
+    },  {
+        "id": 4,
+        "name": "Diet",
+        "picture": "diet.ico"
+    },  {
+        "id": 5,
+        "name": "Swimming",
+        "picture": "yoga.ico"
+    },  {
+        "id": 6,
+        "name": "Biking",
+        "picture": "pilates.ico"
+    }, {
+        "id": 7,
+        "name": "Lifting",
+        "picture": "lifting.ico"
+    }
+]
